@@ -60,8 +60,26 @@ function App() {
     }));
 
   };
+  const [skillCheck, setSkillCheck] = useState({
+    selectedSkill: SKILL_LIST[0].name,  
+    dc: 10,    
+    lastRoll: null as number | null,  
+    success: null as boolean | null    
+  });
 
-  
+  const performSkillCheck = () => {
+    const roll = Math.floor(Math.random() * 20) + 1; 
+    const skill = SKILL_LIST.find(s => s.name === skillCheck.selectedSkill)!;
+    const modifier = calculateModifier(attributes[skill.attributeModifier]);
+    const skillTotal = skills[skillCheck.selectedSkill] + modifier;
+    const total = roll + skillTotal;
+    
+    setSkillCheck(prev => ({
+      ...prev,
+      lastRoll: roll,
+      success: total >= prev.dc
+    }));
+  };
 
   const calculateModifier = (value: number) => {
     return Math.floor((value - 10) / 2);
@@ -128,6 +146,44 @@ const saveCharacter = async () => {
 
   return (
     <div>
+      <div>
+        <h2>Skill Check</h2>
+        <div>
+          <select
+            value={skillCheck.selectedSkill}
+            onChange={(e) => setSkillCheck(prev => ({
+              ...prev,
+              selectedSkill: e.target.value
+            }))}
+          >
+            {SKILL_LIST.map(skill => (
+              <option key={skill.name} value={skill.name}>
+                {skill.name}
+              </option>
+            ))}
+          </select>
+            DC: 
+          <input
+            type="number"
+            value={skillCheck.dc}
+            onChange={(e) => setSkillCheck(prev => ({
+              ...prev,
+              dc: parseInt(e.target.value) || 0
+            }))}
+            placeholder="DC"
+          />
+
+          <button onClick={performSkillCheck}>Roll</button>
+
+          {skillCheck.lastRoll !== null && (
+            <div>
+              Roll: {skillCheck.lastRoll}
+              <br />
+              {skillCheck.success ? 'Result: Successful' : 'Result: Fail'}
+            </div>
+          )}
+        </div>
+      </div>
       <h2>Attributes</h2>
       {ATTRIBUTE_LIST.map(attr => (
         <div key={attr}>
@@ -193,7 +249,6 @@ const saveCharacter = async () => {
       </div>
       {/* Save button */}
       <button onClick={saveCharacter}>Save Character</button>
-
     </div>
   );
 }
