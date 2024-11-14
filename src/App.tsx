@@ -52,8 +52,11 @@ function App() {
     const totalAttributes = Object.values(attributes).reduce((a, b) => a + b, 0);
 
     // 7 - limiting the max attributes to 70
-    if (totalAttributes + skillPoint> 70) return;
-
+    if (totalAttributes + skillPoint> 70) {
+      alert('Cant use more than 70 points');
+      return;
+    }
+    
     setAttributes(prev => ({
       ...prev,
       [attrib]: Math.max(0, prev[attrib] + skillPoint)
@@ -67,18 +70,20 @@ function App() {
     success: null as boolean | null    
   });
 
+  const rollDice = () => Math.floor(Math.random() * 20) + 1;
+
   const performSkillCheck = () => {
-    const roll = Math.floor(Math.random() * 20) + 1; 
-    const skill = SKILL_LIST.find(s => s.name === skillCheck.selectedSkill)!;
-    const modifier = calculateModifier(attributes[skill.attributeModifier]);
-    const skillTotal = skills[skillCheck.selectedSkill] + modifier;
-    const total = roll + skillTotal;
-    
-    setSkillCheck(prev => ({
-      ...prev,
-      lastRoll: roll,
-      success: total >= prev.dc
-    }));
+     const roll = rollDice();
+     const skill = SKILL_LIST.find(s => s.name === skillCheck.selectedSkill);
+     if (!skill) return;
+     
+     const modifier = calculateModifier(attributes[skill.attributeModifier]);
+     const skillTotal = skills[skillCheck.selectedSkill] + modifier;
+     setSkillCheck(prev => ({
+        ...prev,
+        lastRoll: roll,
+        success: roll + skillTotal >= prev.dc
+     }));
   };
 
   const calculateModifier = (value: number) => {
@@ -170,7 +175,6 @@ const saveCharacter = async () => {
               ...prev,
               dc: parseInt(e.target.value) || 0
             }))}
-            placeholder="DC"
           />
 
           <button onClick={performSkillCheck}>Roll</button>
@@ -195,22 +199,18 @@ const saveCharacter = async () => {
         </div>
       ))}
 
-      <div style={{ display: 'flex', gap: '20px' }}>
+
         <div>
         <h2>Classes</h2>
-          {Object.keys(CLASS_LIST).map(className => (
-            <div 
-              key={className}
-              onClick={() => setSelectedClass(className)}
-              style={{ 
-                cursor: 'pointer',
-                // like the Loom video, meeting requirements turn the text red.
-                color: meetsClassRequirements(className) ? 'red' : 'black'
-              }}
-            >
-              {className}
-            </div>
-          ))}
+        {Object.keys(CLASS_LIST).map(className => (
+          <div 
+            key={className}
+            onClick={() => setSelectedClass(className)}
+            className={`className ${meetsClassRequirements(className) ? 'meetsrequirements' : ''}`}
+          >
+            {className}
+          </div>
+        ))}
 
         </div>
         {/* After clicking on the class, the description will be displayed: */}
@@ -229,7 +229,7 @@ const saveCharacter = async () => {
 
           
         )}
-      </div>
+
 
       <div>
         <h2>Skills</h2>

@@ -44,3 +44,10 @@
     transform: rotate(360deg);
   }
 }
+.className {
+  cursor: pointer;
+}
+
+.className.meetsrequirements {
+  color: red;
+}
